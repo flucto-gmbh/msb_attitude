@@ -5,7 +5,9 @@ import signal
 import logging
 
 from datetime import datetime
-from os import path
+
+ATTITUDE_TOPIC = "attitude".encode('utf-8')
+IMU_TOPIC = "imu".encode('utf-8')
 
 def signal_handler_exit(sig, frame):
     logging.info('* msb_fusionlog: bye')
@@ -87,8 +89,15 @@ def parse_arguments() -> dict:
     )
 
     arg_parser.add_argument(
-        '--ipc-port',
-        help='IPC port used by zeroMQ',
+        '--publisher-ipc-port',
+        help='IPC port used by msb_broker to agglomerate data from primary producers',
+        default=5555,
+        type=int
+    )
+
+    arg_parser.add_argument(
+        '--subscriber-ipc-port',
+        help='IPC port used by msb_broker to broadcast data from primary producers',
         default=5556,
         type=int
     )
@@ -96,8 +105,15 @@ def parse_arguments() -> dict:
     arg_parser.add_argument(
         '--ipc-protocol',
         help='the protocol used for IPC with zeroMQ',
-        default='ipc',
+        default='tcp://127.0.0.1',
         type=str,
+    )
+
+    arg_parser.add_argument(
+        '--sample-rate',
+        help='sample rate of the imu data',
+        default=100,
+        type=int
     )
 
     arg_parser.add_argument(
