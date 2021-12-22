@@ -1,3 +1,6 @@
 [submodule "src/ahrs"]
 	path = src/ahrs
-	url = https://github.com/Mayitzin/ahrs.git
+    url = https://github.com/Mayitzin/ahrs.git
+    branch = master
+    update = merge
+
