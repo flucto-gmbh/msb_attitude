@@ -89,14 +89,14 @@ def parse_arguments() -> dict:
     )
 
     arg_parser.add_argument(
-        '--publisher-ipc-port',
+        '--broker-xsub',
         help='IPC port used by msb_broker to agglomerate data from primary producers',
         default=5555,
         type=int
     )
 
     arg_parser.add_argument(
-        '--subscriber-ipc-port',
+        '--broker-xpub',
         help='IPC port used by msb_broker to broadcast data from primary producers',
         default=5556,
         type=int
@@ -112,7 +112,7 @@ def parse_arguments() -> dict:
     arg_parser.add_argument(
         '--sample-rate',
         help='sample rate of the imu data',
-        default=100,
+        default=10,
         type=int
     )
 

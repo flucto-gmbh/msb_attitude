@@ -30,7 +30,7 @@ except ImportError as e:
     sys.exit(-1)
 
 try:
-    from imu_poller import IMUPoller
+    from IMUPoller import IMUPoller
 except ImportError as e:
     print(f'failed to import IMUPoller: {e}')
     sys.exit(-1)
@@ -49,58 +49,49 @@ def initial_attitude_estimation(tries=5) -> Quaternion:
     pass
 
 
-def main():array
+def main():
 
     config = init()
 
     logging.debug('msb_attitude.py starting up')
-    connect_to_sub = f'{config["ipc_protocol"]}:{config["subscriber_ipc_port"]}'
-    connect_to_pub = f'{config["ipc_protocol"]}:{config["publisher_ipc_port"]}'
+    
+    broker_xsub = f'{config["ipc_protocol"]}:{config["broker_xsub"]}'
 
     ctx = zmq.Context()
-    # zmq_socket_sub = ctx.socket(zmq.SUB)
-    # zmq_socket_pub = ctx.socket(zmq.SUB)
-    """
-    logging.debug(f'trying to connect to {connect_to_sub}')
+    socket_broker_xsub = ctx.socket(zmq.PUB)
+    logging.debug(f'trying to connect to {broker_xsub}')
     try:
-        zmq_socket_sub.connect(connect_to_sub)
+        socket_broker_xsub.connect(broker_xsub)
     except Exception as e:
-        logging.fatal(f'failed to bind to zeromq socket {connect_to_sub}: {e}')
+        logging.fatal(f'failed to bind to zeromq socket {broker_xsub}: {e}')
         sys.exit(-1)
+    logging.debug(f'successfully connected to broker XSUB socket as a publisher')
 
-    zmq_socket_sub.setsockopt(zmq.SUBSCRIBE, IMU_TOPIC)
-    logging.debug(f'successfully connected to broker xpub socket as subscriber')
-    """
-
-    logging.debug(f'trying to connect to {connect_to_pub}')
-    try:
-        zmq_socket_pub.connect(connect_to_pub)
-    except Exception as e:
-        logging.fatal(f'failed to connect to socket {connect_to_pub}: {e}')
-        sys.exit(-1)
-
-    logging.debug(f'successfully connected to broker xsub socket as publisher')
-
+    logging.debug('instantiating IMU poller object')
     imu_poller = IMUPoller('imu', config, ctx)
     logging.debug('starting IMU poller')
     imu_poller.start()
     logging.debug('successfully started IMU poller')
 
+    logging.debug('creating quaternions for attitude estimation')
     q_current = Quaternion(np.array([1, 1, 1, 1]))
     q_old = Quaternion(np.array([1, 1, 1, 1]))
 
+    logging.debug('instantiating complementary filter object')
     cfilter = Complementary(frequency=config['sample_rate'], q0 = q_current)
     logging.debug(f'entering endless loop')
 
     while True:
         if imu_poller.new_data:
+            logging.debug('retrieving new data from IMU poller')
             
             # get data from poller
             data = np.array(imu_poller.get_data())
 
             # print received data if --print flag was set
             if config['print']:
-                print(f'Imu: {data}')
+                print(f'imu: {data}')
+            logging.debug(f'imu: {data}')
 
             # update filter and store the updated orientation
             q_current = Quaternion(
@@ -113,7 +104,8 @@ def main():array
             )
 
             if config['print']:
-                print(f'Orientation: {q_current}')
+                print(f'attitude: {q_current}')
+            logging.debug(f'attitude: {q_current}')
 
             # save for next step
             q_old = q_current
