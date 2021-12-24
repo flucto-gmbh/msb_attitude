@@ -1,16 +1,24 @@
 import zmq
 import logging
 import sys
-import pickle
+from os import path
+import time
+import numpy as np
+
+# add ahrs directory to PYTHONPATH
+SCRIPT_DIR = path.dirname(path.abspath(__file__))
+sys.path.append(path.dirname(SCRIPT_DIR))
+
+print(SCRIPT_DIR)
 
 try:
-    from .ahrs.ahrs.filters import (Complementary, FAMC)
+    from ahrs.ahrs.filters import (Complementary, FAMC)
 except ImportError as e:
     print(f'failed to import Complementary filter from ahrs: {e}')
     sys.exit(-1)
 
 try:
-    from .ahrs.ahrs.common import Quaternion
+    from ahrs.ahrs.common import Quaternion
 except ImportError as e:
     print(f'failed to import Quaternion from ahrs: {e}')
     sys.exit(-1)
@@ -18,7 +26,13 @@ except ImportError as e:
 try:
     from attitude_config import (init, ATTITUDE_TOPIC, IMU_TOPIC)
 except ImportError as e:
-    logging.error(f'failed to import: {e} - exit')
+    print(f'failed to import: {e} - exit')
+    sys.exit(-1)
+
+try:
+    from imu_poller import IMUPoller
+except ImportError as e:
+    print(f'failed to import IMUPoller: {e}')
     sys.exit(-1)
 
 def initial_attitude_estimation(tries=5) -> Quaternion: 
@@ -35,7 +49,7 @@ def initial_attitude_estimation(tries=5) -> Quaternion:
     pass
 
 
-def main():
+def main():array
 
     config = init()
 
@@ -44,9 +58,9 @@ def main():
     connect_to_pub = f'{config["ipc_protocol"]}:{config["publisher_ipc_port"]}'
 
     ctx = zmq.Context()
-    zmq_socket_sub = ctx.socket(zmq.SUB)
-    zmq_socket_pub = ctx.socket(zmq.PUB)
-
+    # zmq_socket_sub = ctx.socket(zmq.SUB)
+    # zmq_socket_pub = ctx.socket(zmq.SUB)
+    """
     logging.debug(f'trying to connect to {connect_to_sub}')
     try:
         zmq_socket_sub.connect(connect_to_sub)
@@ -56,6 +70,7 @@ def main():
 
     zmq_socket_sub.setsockopt(zmq.SUBSCRIBE, IMU_TOPIC)
     logging.debug(f'successfully connected to broker xpub socket as subscriber')
+    """
 
     logging.debug(f'trying to connect to {connect_to_pub}')
     try:
@@ -66,19 +81,55 @@ def main():
 
     logging.debug(f'successfully connected to broker xsub socket as publisher')
 
-    cfilter = Complementary(frequency=config['sample_rate'])
+    imu_poller = IMUPoller('imu', config, ctx)
+    logging.debug('starting IMU poller')
+    imu_poller.start()
+    logging.debug('successfully started IMU poller')
 
+    q_current = Quaternion(np.array([1, 1, 1, 1]))
+    q_old = Quaternion(np.array([1, 1, 1, 1]))
+
+    cfilter = Complementary(frequency=config['sample_rate'], q0 = q_current)
     logging.debug(f'entering endless loop')
 
-    # build a generator classes using threads
     while True:
+        if imu_poller.new_data:
+            
+            # get data from poller
+            data = np.array(imu_poller.get_data())
 
-        #recv = zmq_socket_sub.recv_pyobj()
-        [topic, data] = zmq_socket_sub.recv_multipart()
-        topic = topic.decode('utf-8')
+            # print received data if --print flag was set
+            if config['print']:
+                print(f'Imu: {data}')
 
-        if config['print']: 
-            print(f'{pickle.loads(data)}')
+            # update filter and store the updated orientation
+            q_current = Quaternion(
+                cfilter.update(
+                    q_old.A,
+                    data[5:8],    #gyr
+                    data[2:5],    #acc
+                    data[8:11]    #mag
+                )
+            )
+
+            if config['print']:
+                print(f'Orientation: {q_current}')
+
+            # save for next step
+            q_old = q_current
+            
+            # push to XSUB msb_broker to publish data
+
+            
+        else:
+            time.sleep(0.001)
+
+        # recv = zmq_socket_sub.recv_pyobj()
+        # [topic, data] = zmq_socket_sub.recv_multipart()
+        # topic = topic.decode('utf-8')
+
+        # if config['print']: 
+        #     print(f'{pickle.loads(data)}')
        
 if __name__ == '__main__':
     main()
