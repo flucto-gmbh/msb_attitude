@@ -3,6 +3,7 @@ import logging
 import sys
 from os import path
 import time
+import pickle
 import numpy as np
 
 # add ahrs directory to PYTHONPATH
@@ -109,8 +110,17 @@ def main():
 
             # save for next step
             q_old = q_current
-            
+            socket_broker_xsub.send_multipart(
+                [
+                    ATTITUDE_TOPIC,    # topic
+                    pickle.dumps( # serialize the payload
+                        q_current.A.tolist()
+                    )
+                ]
+            )
+
             # push to XSUB msb_broker to publish data
+
 
             
         else:
