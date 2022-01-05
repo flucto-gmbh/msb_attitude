@@ -1,9 +1,10 @@
 [Unit]
-Description=Motion Sensor Box Inertial Measurement Unit Service
+Description=Motion Sensor Box Attitude Estimation Service
 After=network.target
 StartLimitIntervalSec=0
 
 [Service]
+SyslogIdentifier=msb-attitude
 Type=simple
 Restart=always
 RestartSec=1
