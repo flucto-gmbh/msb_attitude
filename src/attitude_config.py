@@ -58,7 +58,7 @@ def parse_arguments() -> dict:
         '--print',
         action='store_true',
         help='prints the incoming data',
-        default=True
+        default=False
     )
 
     arg_parser.add_argument(

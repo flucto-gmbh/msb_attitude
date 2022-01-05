@@ -10,8 +10,6 @@ import numpy as np
 SCRIPT_DIR = path.dirname(path.abspath(__file__))
 sys.path.append(path.dirname(SCRIPT_DIR))
 
-print(SCRIPT_DIR)
-
 try:
     from ahrs.ahrs.filters import (Complementary, FAMC)
 except ImportError as e:
@@ -84,15 +82,13 @@ def main():
 
     while True:
         if imu_poller.new_data:
-            logging.debug('retrieving new data from IMU poller')
             
             # get data from poller
             data = np.array(imu_poller.get_data())
 
             # print received data if --print flag was set
-            if config['print']:
-                print(f'imu: {data}')
-            logging.debug(f'imu: {data}')
+            # if config['print']:
+            #     print(f'imu: {data}')
 
             # update filter and store the updated orientation
             q_current = Quaternion(
@@ -106,7 +102,6 @@ def main():
 
             if config['print']:
                 print(f'attitude: {q_current}')
-            logging.debug(f'attitude: {q_current}')
 
             # save for next step
             q_old = q_current
@@ -119,12 +114,9 @@ def main():
                 ]
             )
 
-            # push to XSUB msb_broker to publish data
-
-
             
         else:
-            time.sleep(0.001)
+            time.sleep(0.01)
 
         # recv = zmq_socket_sub.recv_pyobj()
         # [topic, data] = zmq_socket_sub.recv_multipart()
