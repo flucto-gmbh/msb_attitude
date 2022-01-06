@@ -6,7 +6,7 @@ import logging
 
 from datetime import datetime
 
-ATTITUDE_TOPIC = "attitude".encode('utf-8')
+ATTITUDE_TOPIC = "att".encode('utf-8')
 IMU_TOPIC = "imu".encode('utf-8')
 
 def signal_handler_exit(sig, frame):
