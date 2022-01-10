@@ -4,7 +4,7 @@ import sys
 from os import path
 import pickle
 import numpy as np
-from time import time
+import time
 
 # add ahrs directory to PYTHONPATH
 SCRIPT_DIR = path.dirname(path.abspath(__file__))
@@ -62,29 +62,30 @@ def main():
     logging.debug('creating quaternions for attitude estimation')
     q_current = Quaternion(np.array([1, 1, 1, 1]))
     q_old = Quaternion(np.array([1, 1, 1, 1]))
-    
-    logging.debug('instantiating complementary filter object')
-    cfilter = Complementary(frequency=config['sample_rate'], q0 = q_current)
-    logging.debug(f'entering endless loop')
 
-    t_old = time()    
+    t_old = time.time()
+    t_cur = time.time()
+    delta_t = 0
 
     try:
         while True:
 
             # get data from socket
+            t_cur = time.time()
+            delta_t = t_cur - t_old
             [topic, data] = socket_broker_xpub.recv_multipart()
             topic = topic.decode('utf-8')
             data = pickle.loads(data)
 
-            time = data[0]
+            imu_time = data[0]
             acc = np.array(data[2:5])
             gyr = np.array(data[5:8])
             mag = np.array(data[8:11])
 
             if config['print']:
                 print(f'{topic} : {data}')
-                print(f'time : {time} acc : {acc} gyr : {gyr} mag : {mag}')
+                print(f'time : {imu_time} acc : {acc} gyr : {gyr} mag : {mag}')
+                print(f'delta_t : {delta_t}')
 
             # print received data if --print flag was set
             # if config['print']:
@@ -92,11 +93,12 @@ def main():
 
             # update filter and store the updated orientation
             q_current = Quaternion(
-               cfilter.update(
-                   q_old.A,
-                   gyr,    #gyr
-                   acc,    #acc
-                   mag    #mag
+               famc.update(
+                   q = q_old.A,
+                   gyr = gyr,    #gyr
+                   acc = acc,    #acc
+                   mag = mag,    #mag
+                   dt = delta_t
                )
             )
 
@@ -113,6 +115,10 @@ def main():
                      )
                 ]
             )
+            while time.time() - t_old < 0.1:
+                print('sleeping')
+                time.sleep(0.005)
+            t_old = t_cur
 
     except Exception as e:
         logging.fatal(f'received Exception: {e}')
@@ -120,7 +126,7 @@ def main():
 
         socket_broker_xpub.close()
         socket_broker_xsub.close()
-        ctx.close()
+        ctx.terminate()
 
        
 if __name__ == '__main__':
