@@ -93,8 +93,14 @@ def main():
             topic = topic.decode('utf-8')
             data = pickle.loads(data)
 
+            time = data[0]
+            acc = data[2:5]
+            gyr = data[5:8]
+            mag = data[8:11]
+
             if config['print']:
                 print(f'{topic} : {data}')
+                print(f'    acc : {acc} gyr : {gyr} mag : {mag}')
 
             # print received data if --print flag was set
             # if config['print']:
@@ -104,9 +110,9 @@ def main():
             q_current = Quaternion(
                cfilter.update(
                    q_old.A,
-                   data[5:8],    #gyr
-                   data[2:5],    #acc
-                   data[8:11]    #mag
+                   gyr,    #gyr
+                   acc,    #acc
+                   mag    #mag
                )
             )
 
@@ -130,6 +136,7 @@ def main():
 
         socket_broker_xpub.close()
         socket_broker_xsub.close()
+        ctx.close()
 
        
 if __name__ == '__main__':
