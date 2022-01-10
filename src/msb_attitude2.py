@@ -71,7 +71,7 @@ def main():
     logging.debug(f'successfully connected to broker XPUB socket as a subscriber')
 
     print(type(IMU_TOPIC), IMU_TOPIC)
-    # socket_broker_xpub.setsockopt_string(zmq.SUBSCRIBE, IMU_TOPIC)
+    socket_broker_xpub.setsockopt_string(zmq.SUBSCRIBE, IMU_TOPIC)
     
     logging.debug('creating quaternions for attitude estimation')
     q_current = Quaternion(np.array([1, 1, 1, 1]))
