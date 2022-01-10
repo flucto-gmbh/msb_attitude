@@ -35,7 +35,7 @@ def main():
 
     while True:
 
-        ts = datetime.utcnow().timestamp()
+        ts = time.time()
 
         data = np.empty(5)
         data[0] = ts
