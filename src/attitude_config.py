@@ -10,7 +10,8 @@ ATTITUDE_TOPIC = "att".encode('utf-8')
 IMU_TOPIC = "imu".encode('utf-8')
 
 def signal_handler_exit(sig, frame):
-    logging.info('* msb_fusionlog: bye')
+    logging.info('* msb_attitude.py: bye')
+
     sys.exit(0)
 
 def dump_config_file(config : dict):
@@ -137,7 +138,7 @@ def init() -> dict:
     # create a logging file based on the command line
     logging.basicConfig(
         filename=config['logfile'],
-        level=config['verbose'] if logging.DEBUG else logging.WARNING,
+        level=logging.DEBUG if config['verbose'] else logging.WARNING,
         format='%(levelname)s: %(asctime)s %(message)s',
         datefmt='%Y%m%dT%H%M%S%z',
     )

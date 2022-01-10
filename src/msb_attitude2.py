@@ -85,52 +85,52 @@ def main():
     cfilter = Complementary(frequency=config['sample_rate'], q0 = q_current)
     logging.debug(f'entering endless loop')
 
-    while True:
-            
-        # get data from socket
-        [topic, data] = socket_broker_xpub.recv_multipart()
-        topic = topic.decode('utf-8')
-        data = pickle.loads(data)
+    try:
+        while True:
 
-        if config['print']:
-            print(f'{topic} : {data}')
+            # get data from socket
+            [topic, data] = socket_broker_xpub.recv_multipart()
+            topic = topic.decode('utf-8')
+            data = pickle.loads(data)
 
-        # print received data if --print flag was set
-        # if config['print']:
-        #     print(f'imu: {data}')
+            if config['print']:
+                print(f'{topic} : {data}')
 
-        # update filter and store the updated orientation
-        q_current = Quaternion(
-           cfilter.update(
-               q_old.A,
-               data[5:8],    #gyr
-               data[2:5],    #acc
-               data[8:11]    #mag
-           )
-        )
+            # print received data if --print flag was set
+            # if config['print']:
+            #     print(f'imu: {data}')
 
-        if config['print']:
-             print(f'attitude: {q_current}')
- 
-        # save for next step
-        q_old = q_current
-        socket_broker_xsub.send_multipart(
-            [
-                 ATTITUDE_TOPIC,    # topic
-                 pickle.dumps( # serialize the payload
-                     q_current.A.tolist()
-                 )
-            ]
-        )
+            # update filter and store the updated orientation
+            q_current = Quaternion(
+               cfilter.update(
+                   q_old.A,
+                   data[5:8],    #gyr
+                   data[2:5],    #acc
+                   data[8:11]    #mag
+               )
+            )
 
-            
+            if config['print']:
+                 print(f'attitude: {q_current}')
+    
+            # save for next step
+            q_old = q_current
+            socket_broker_xsub.send_multipart(
+                [
+                     ATTITUDE_TOPIC,    # topic
+                     pickle.dumps( # serialize the payload
+                         q_current.A.tolist()
+                     )
+                ]
+            )
 
-        # recv = zmq_socket_sub.recv_pyobj()
-        # [topic, data] = zmq_socket_sub.recv_multipart()
-        # topic = topic.decode('utf-8')
+    except Exception as e:
+        logging.fatal(f'received Exception: {e}')
+        logging.fatal('cleaning up')
 
-        # if config['print']: 
-        #     print(f'{pickle.loads(data)}')
+        socket_broker_xpub.close()
+        socket_broker_xsub.close()
+
        
 if __name__ == '__main__':
     main()
