@@ -2,9 +2,9 @@ import zmq
 import logging
 import sys
 from os import path
-import time
 import pickle
 import numpy as np
+from time import time
 
 # add ahrs directory to PYTHONPATH
 SCRIPT_DIR = path.dirname(path.abspath(__file__))
@@ -27,19 +27,6 @@ try:
 except ImportError as e:
     print(f'failed to import: {e} - exit')
     sys.exit(-1)
-
-def initial_attitude_estimation(tries=5) -> Quaternion: 
-
-    # for as many tries:
-    #     find the current (steady state) orientation
-    # if not steady_state:
-    #     ???
-    # returns the initial orientation as a quaternion
-    # can we use magnetic field and accelerometer data to
-    # estimate the initial orientation? e.g. davenport's q-method
-    # or FAMC
-
-    pass
 
 
 def main():
@@ -70,17 +57,12 @@ def main():
         sys.exit(-1)
     logging.debug(f'successfully connected to broker XPUB socket as a subscriber')
 
-    print(type(IMU_TOPIC), IMU_TOPIC)
     socket_broker_xpub.setsockopt(zmq.SUBSCRIBE, IMU_TOPIC)
     
     logging.debug('creating quaternions for attitude estimation')
     q_current = Quaternion(np.array([1, 1, 1, 1]))
     q_old = Quaternion(np.array([1, 1, 1, 1]))
     
-    # instantiate time stamp variables
-    t_old = time.time()
-    t_now = time.time()
-
     logging.debug('instantiating complementary filter object')
     cfilter = Complementary(frequency=config['sample_rate'], q0 = q_current)
     logging.debug(f'entering endless loop')
