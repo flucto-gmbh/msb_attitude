@@ -67,6 +67,8 @@ def main():
     cfilter = Complementary(frequency=config['sample_rate'], q0 = q_current)
     logging.debug(f'entering endless loop')
 
+    t_old = time()    
+
     try:
         while True:
 
@@ -76,13 +78,13 @@ def main():
             data = pickle.loads(data)
 
             time = data[0]
-            acc = data[2:5]
-            gyr = data[5:8]
-            mag = data[8:11]
+            acc = np.array(data[2:5])
+            gyr = np.array(data[5:8])
+            mag = np.array(data[8:11])
 
             if config['print']:
                 print(f'{topic} : {data}')
-                print(f'    acc : {acc} gyr : {gyr} mag : {mag}')
+                print(f'time : {time} acc : {acc} gyr : {gyr} mag : {mag}')
 
             # print received data if --print flag was set
             # if config['print']:
