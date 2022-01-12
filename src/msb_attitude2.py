@@ -103,12 +103,10 @@ def main():
 
             if config['print']:
                 print(f'time : {imu_time} acc : {acc} gyr : {gyr} mag : {mag}')
-                print(f'dt : {dt}')
-                print(f'dt_int : {dt_int}')
 
             # Complementary filter
             pitch += gyr[0]*dt_int
-            roll += gyr[1]*dt_int
+            roll -= gyr[1]*dt_int
 
             # Only use accelerometer when it's steady (magnitude is near 1g)
             force_magnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
