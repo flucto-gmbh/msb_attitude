@@ -82,7 +82,7 @@ def main():
                 continue
             
 
-            data = pickle.load(
+            data = pickle.loads(
                 imu_buffer.pop()
             )
 
