@@ -5,6 +5,8 @@ from os import path
 import pickle
 import numpy as np
 import time
+import threading
+from collections import deque
 
 
 try:
@@ -12,6 +14,23 @@ try:
 except ImportError as e:
     print(f'failed to import: {e} - exit')
     sys.exit(-1)
+
+imu_buffer = deque(maxlen=1)
+
+def read_from_zeromq(socket):
+    global imu_buffer
+    try:
+        while True:
+            topic_bin, data_bin = socket.recv_multipart()
+            if topic_bin == ATTITUDE_TOPIC:
+                imu_buffer.append(data_bin)
+            else:
+                assert False
+
+    except Exception as e:
+        logging.critical(f"failed: {e}")
+        sys.exit(-1)
+
 
 
 def main():
@@ -43,7 +62,9 @@ def main():
     logging.debug(f'successfully connected to broker XPUB socket as a subscriber')
 
     socket_broker_xpub.setsockopt(zmq.SUBSCRIBE, IMU_TOPIC)
-    
+
+    threading.Thread(target=read_from_zeromq, daemon=True, args=[socket_broker_xpub]).start()
+
     t_old = time.time()
     t_cur = time.time()
     delta_t = 0
@@ -54,9 +75,10 @@ def main():
             # get data from socket
             t_cur = time.time()
             delta_t = t_cur - t_old
-            [topic, data] = socket_broker_xpub.recv_multipart()
-            topic = topic.decode('utf-8')
-            data = pickle.loads(data)
+
+            data = pickle.load(
+                imu_buffer.pop()
+            )
 
             imu_time = data[0]
             acc = data[2:5]
