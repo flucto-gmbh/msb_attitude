@@ -79,7 +79,7 @@ def main():
             dt = t_cur - t_old
 
             if len(imu_buffer) == 0:
-                logging.warning(f'no imu data in buffer, sleeping')
+                logging.debug(f'no imu data in buffer, sleeping')
                 time.sleep(0.005)
                 continue
             
@@ -110,7 +110,7 @@ def main():
             p = (pitch*180/math.pi)
             r = (roll*180/math.pi)
             if config['print']:
-                print(f'{p} {r}')
+                print(f'pitch: {p} roll: {r}')
 
             # print received data if --print flag was set
             # if config['print']:
@@ -126,10 +126,9 @@ def main():
                 ]
             )
             while (tt := time.time() - t_old) < 0.1:
-                print(f'sleeping {tt}')
-                time.sleep(0.001)
+                #print(f'sleeping {tt}')
+                time.sleep(0.0025)
 
-            t_old = t_cur
 
     except Exception as e:
         logging.fatal(f'received Exception: {e}')
