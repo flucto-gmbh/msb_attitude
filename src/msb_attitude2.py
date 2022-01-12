@@ -79,8 +79,8 @@ def main():
 
             # check if data is available in the deque
             if len(imu_buffer) == 0:
-                logging.debug(f'no imu data in buffer, sleeping')
-                time.sleep(0.005)
+                logging.debug(f'no imu data in buffer')
+                time.sleep(0.001)
                 continue
             
             # calculate dt
@@ -137,7 +137,7 @@ def main():
             )
             while (tt := time.time() - t_cur) < TIME_STEP:
                 print(f'sleeping {tt}')
-                time.sleep(0.0025)
+                time.sleep(0.001)
 
             t_old = t_cur
 
