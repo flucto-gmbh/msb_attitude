@@ -67,7 +67,9 @@ def main():
 
     t_old = time.time()
     t_cur = time.time()
-    delta_t = 0
+    dt = 0
+    pitch = 0
+    roll = 0
 
     try:
         while True:
