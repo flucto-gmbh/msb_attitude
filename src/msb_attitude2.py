@@ -76,6 +76,12 @@ def main():
             t_cur = time.time()
             delta_t = t_cur - t_old
 
+            if imu_buffer.count() == 0:
+                logging.warn(f'no imu data in buffer, sleeping')
+                time.sleep(0.005)
+                continue
+            
+
             data = pickle.load(
                 imu_buffer.pop()
             )
@@ -86,7 +92,6 @@ def main():
             mag = data[8:11]
 
             if config['print']:
-                print(f'{topic} : {data}')
                 print(f'time : {imu_time} acc : {acc} gyr : {gyr} mag : {mag}')
                 print(f'delta_t : {delta_t}')
 
