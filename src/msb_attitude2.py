@@ -44,10 +44,6 @@ def main():
 
     socket_broker_xpub.setsockopt(zmq.SUBSCRIBE, IMU_TOPIC)
     
-    logging.debug('creating quaternions for attitude estimation')
-    q_current = Quaternion(np.array([1, 1, 1, 1]))
-    q_old = Quaternion(np.array([1, 1, 1, 1]))
-
     t_old = time.time()
     t_cur = time.time()
     delta_t = 0
