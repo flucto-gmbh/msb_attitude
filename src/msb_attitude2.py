@@ -11,7 +11,7 @@ import math
 
 
 try:
-    from attitude_config import (init, ATTITUDE_TOPIC, IMU_TOPIC, GYR_SENS)
+    from attitude_config import (init, ATTITUDE_TOPIC, IMU_TOPIC, TIME_STEP)
 except ImportError as e:
     print(f'failed to import: {e} - exit')
     sys.exit(-1)
@@ -74,15 +74,15 @@ def main():
     try:
         while True:
 
-            # get data from socket
-            t_cur = time.time()
-            dt = t_cur - t_old
-
+            # check if data is available in the deque
             if len(imu_buffer) == 0:
                 logging.debug(f'no imu data in buffer, sleeping')
                 time.sleep(0.005)
                 continue
             
+            # calculate dt
+            t_cur = time.time()
+            dt = t_cur - t_old           
 
             data = pickle.loads(
                 imu_buffer.pop()
@@ -98,8 +98,8 @@ def main():
                 print(f'dt : {dt}')
 
             # Complementary filter
-            pitch += (gyr[0]/GYR_SENS)*dt
-            roll -= (gyr[1]/GYR_SENS)*dt
+            pitch += gyr[0]*dt
+            roll -= gyr[1]*dt
 
             # Only use accelerometer when it's steady (magnitude is near 1g)
             forceMagnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
@@ -125,7 +125,7 @@ def main():
                     )
                 ]
             )
-            while (tt := time.time() - t_old) < 1:
+            while (tt := time.time() - t_old) < TIME_STEP:
                 #print(f'sleeping {tt}')
                 time.sleep(0.0025)
 

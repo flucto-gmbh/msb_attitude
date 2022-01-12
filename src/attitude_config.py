@@ -8,8 +8,8 @@ from datetime import datetime
 
 ATTITUDE_TOPIC = "att".encode('utf-8')
 IMU_TOPIC = "imu".encode('utf-8')
-DELTAT=0.1
-GYR_SENS=65.536
+DELTAT = 0.1
+TIME_STEP = 0.1
 
 def signal_handler_exit(sig, frame):
     logging.info('* msb_attitude.py: bye')
