@@ -67,6 +67,9 @@ def main():
 
     t_old = time.time()
     t_cur = time.time()
+    t_int_old = 0
+    t_int_cur = 0
+    dt_int = 0
     dt = 0
     pitch = 0
     roll = 0
@@ -93,19 +96,26 @@ def main():
             gyr = data[5:8]
             mag = data[8:11]
 
+            t_int_cur = imu_time
+            dt_int = t_int_cur - t_int_old
+            t_int_old = t_int_cur
+
             if config['print']:
                 print(f'time : {imu_time} acc : {acc} gyr : {gyr} mag : {mag}')
                 print(f'dt : {dt}')
+                print(f'dt_int : {dt_int}')
 
             # Complementary filter
-            pitch += gyr[0]*dt
-            roll -= gyr[1]*dt
+            pitch += gyr[0]*dt_int
+            roll += gyr[1]*dt_int
 
             # Only use accelerometer when it's steady (magnitude is near 1g)
-            forceMagnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
-            if forceMagnitude > 0.9 and forceMagnitude < 1.1:
+            force_magnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
+            if force_magnitude > 0.9 and force_magnitude < 1.1:
                 pitch = pitch*0.95 + math.atan2(acc[1], math.sqrt(acc[0]**2 + acc[2]**2) )*180/math.pi *0.05
                 roll = roll*0.9 + math.atan2(-acc[0], acc[2])*180/math.pi *0.05
+            else:
+                logging.debug(f'exceeding acceleration magnitude: {force_magnitude}')
 
             p = (pitch*180/math.pi)
             r = (roll*180/math.pi)
