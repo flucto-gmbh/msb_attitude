@@ -81,7 +81,7 @@ def main():
                     )
                 ]
             )
-            while tt := time.time() - t_old < 0.1:
+            while (tt := time.time() - t_old) < 0.1:
                 print(f'sleeping {tt}')
                 time.sleep(0.001)
 
