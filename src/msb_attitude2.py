@@ -109,7 +109,8 @@ def main():
 
             p = (pitch*180/math.pi)
             r = (roll*180/math.pi)
-            logging.debug(f'{round(p)}, {round(r)}')
+            if config['print']:
+                print(f'{p} {r}')
 
             # print received data if --print flag was set
             # if config['print']:
