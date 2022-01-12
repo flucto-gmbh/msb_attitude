@@ -7,10 +7,11 @@ import numpy as np
 import time
 import threading
 from collections import deque
+import math
 
 
 try:
-    from attitude_config import (init, ATTITUDE_TOPIC, IMU_TOPIC)
+    from attitude_config import (init, ATTITUDE_TOPIC, IMU_TOPIC, GYR_SENS)
 except ImportError as e:
     print(f'failed to import: {e} - exit')
     sys.exit(-1)
@@ -29,7 +30,6 @@ def read_from_zeromq(socket):
     except Exception as e:
         logging.critical(f"failed: {e}")
         sys.exit(-1)
-
 
 
 def main():
@@ -74,7 +74,7 @@ def main():
 
             # get data from socket
             t_cur = time.time()
-            delta_t = t_cur - t_old
+            dt = t_cur - t_old
 
             if len(imu_buffer) == 0:
                 logging.warning(f'no imu data in buffer, sleeping')
@@ -93,7 +93,21 @@ def main():
 
             if config['print']:
                 print(f'time : {imu_time} acc : {acc} gyr : {gyr} mag : {mag}')
-                print(f'delta_t : {delta_t}')
+                print(f'dt : {dt}')
+
+            # Complementary filter
+            pitch += (gyr[0]/GYR_SENS)*dt
+            roll -= (gyr[1]/GYR_SENS)*dt
+
+            # Only use accelerometer when it's steady (magnitude is near 1g)
+            forceMagnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
+            if forceMagnitude > 0.9 and forceMagnitude < 1.1:
+                pitch = pitch*0.95 + math.atan2(acc[1], math.sqrt(acc[0]**2 + acc[2]**2) )*180/math.pi *0.05
+                roll = roll*0.9 + math.atan2(-acc[0], acc[2])*180/math.pi *0.05
+
+            p = (pitch*180/math.pi)
+            r = (roll*180/math.pi)
+            logging.debug(f'{round(p)}, {round(r)}')
 
             # print received data if --print flag was set
             # if config['print']:
