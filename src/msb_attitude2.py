@@ -24,10 +24,7 @@ def read_from_zeromq(socket):
         while True:
             topic_bin, data_bin = socket.recv_multipart()
             logging.debug(f'received {topic_bin}')
-            if topic_bin == ATTITUDE_TOPIC:
-                imu_buffer.append(data_bin)
-            else:
-                assert False
+            imu_buffer.append(data_bin)
 
     except Exception as e:
         logging.critical(f"failed: {e}")
@@ -79,7 +76,7 @@ def main():
             delta_t = t_cur - t_old
 
             if len(imu_buffer) == 0:
-                logging.warn(f'no imu data in buffer, sleeping')
+                logging.warning(f'no imu data in buffer, sleeping')
                 time.sleep(0.1)
                 continue
             
