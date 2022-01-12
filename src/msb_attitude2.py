@@ -80,7 +80,7 @@ def main():
 
             if len(imu_buffer) == 0:
                 logging.warn(f'no imu data in buffer, sleeping')
-                time.sleep(0.005)
+                time.sleep(0.1)
                 continue
             
 
