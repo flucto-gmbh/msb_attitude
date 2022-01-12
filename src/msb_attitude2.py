@@ -76,7 +76,7 @@ def main():
             t_cur = time.time()
             delta_t = t_cur - t_old
 
-            if imu_buffer.count() == 0:
+            if len(imu_buffer) == 0:
                 logging.warn(f'no imu data in buffer, sleeping')
                 time.sleep(0.005)
                 continue
