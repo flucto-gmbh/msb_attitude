@@ -18,7 +18,7 @@ except ImportError as e:
 imu_buffer = deque(maxlen=1)
 
 def read_from_zeromq(socket):
-    logging.debug(f'starting imu consumer thread')
+    logging.debug(f'in consumer thread')
     global imu_buffer
     try:
         while True:
@@ -62,6 +62,7 @@ def main():
 
     socket_broker_xpub.setsockopt(zmq.SUBSCRIBE, IMU_TOPIC)
 
+    logging.debug(f'starting imu consumer thread')
     threading.Thread(target=read_from_zeromq, daemon=True, args=[socket_broker_xpub]).start()
 
     t_old = time.time()
