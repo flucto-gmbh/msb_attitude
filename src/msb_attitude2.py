@@ -59,9 +59,9 @@ def main():
             data = pickle.loads(data)
 
             imu_time = data[0]
-            acc = np.array(data[2:5])
-            gyr = np.array(data[5:8])
-            mag = np.array(data[8:11])
+            acc = data[2:5]
+            gyr = data[5:8]
+            mag = data[8:11]
 
             if config['print']:
                 print(f'{topic} : {data}')
@@ -81,9 +81,10 @@ def main():
                     )
                 ]
             )
-            while time.time() - t_old < 0.1:
-                print('sleeping')
-                time.sleep(0.005)
+            while tt := time.time() - t_old < 0.1:
+                print(f'sleeping {tt}')
+                time.sleep(0.001)
+
             t_old = t_cur
 
     except Exception as e:
