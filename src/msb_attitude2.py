@@ -70,6 +70,7 @@ def main():
     t_int_old = 0
     t_int_cur = 0
     dt_int = 0
+    dt_sleep = 0
     dt = 0
     pitch = 0
     roll = 0
@@ -135,9 +136,15 @@ def main():
                     )
                 ]
             )
-            while (tt := time.time() - t_cur) < TIME_STEP:
-                logging.debug(f'sleeping {tt}')
-                time.sleep(0.001)
+
+            dt_sleep = (t_cur + TIME_STEP) - time.time()
+            if dt_sleep > 0:
+                logging.debug(f'sleeping for {dt_sleep} s')
+                time.sleep(dt_sleep)
+            
+            #while (tt := time.time() - t_cur) < TIME_STEP:
+            #    logging.debug(f'sleeping {tt}')
+            #    time.sleep(0.001)
 
             t_old = t_cur
 
