@@ -135,7 +135,7 @@ def main():
                     )
                 ]
             )
-            while (tt := time.time() - t_old) < TIME_STEP:
+            while (tt := time.time() - t_cur) < TIME_STEP:
                 print(f'sleeping {tt}')
                 time.sleep(0.0025)
 
