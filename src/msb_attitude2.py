@@ -18,10 +18,12 @@ except ImportError as e:
 imu_buffer = deque(maxlen=1)
 
 def read_from_zeromq(socket):
+    logging.debug(f'starting imu consumer thread')
     global imu_buffer
     try:
         while True:
             topic_bin, data_bin = socket.recv_multipart()
+            logging.debug(f'received {topic_bin}')
             if topic_bin == ATTITUDE_TOPIC:
                 imu_buffer.append(data_bin)
             else:
