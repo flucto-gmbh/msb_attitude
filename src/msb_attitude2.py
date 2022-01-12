@@ -126,7 +126,7 @@ def main():
                 ]
             )
             while (tt := time.time() - t_old) < TIME_STEP:
-                #print(f'sleeping {tt}')
+                print(f'sleeping {tt}')
                 time.sleep(0.0025)
 
             t_old = t_cur
