@@ -72,10 +72,6 @@ def main():
             # if config['print']:
             #     print(f'imu: {data}')
 
-            # update filter and store the updated orientation
-            if config['print']:
-                 print(f'attitude: {q_current}')
-    
             # save for next step
             socket_broker_xsub.send_multipart(
                 [
