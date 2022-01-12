@@ -125,9 +125,11 @@ def main():
                     )
                 ]
             )
-            while (tt := time.time() - t_old) < 0.1:
+            while (tt := time.time() - t_old) < 1:
                 #print(f'sleeping {tt}')
                 time.sleep(0.0025)
+
+            t_old = t_cur
 
 
     except Exception as e:
