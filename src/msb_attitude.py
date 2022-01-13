@@ -142,7 +142,7 @@ def main():
                 [
                     ATTITUDE_TOPIC,    # topic
                     pickle.dumps( # serialize the payload
-                        [pitch, roll, pitch_corr, roll_corr]
+                        [imu_time, pitch, roll, pitch_corr, roll_corr]
                     )
                 ]
             )
