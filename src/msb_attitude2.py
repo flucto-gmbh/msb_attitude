@@ -67,11 +67,10 @@ def main():
 
     t_old = time.time()
     t_cur = time.time()
-    t_int_old = 0
-    t_int_cur = 0
-    dt_int = 0
-    dt_sleep = 0
-    dt = 0
+    t_int_old = time.time()
+    t_int_cur = time.time()
+    dt_int = 0.1
+    dt_sleep = 0.001
     pitch = 0
     roll = 0
 
