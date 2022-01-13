@@ -103,14 +103,17 @@ def main():
             if config['print']:
                 print(f'time : {imu_time} acc : {acc} gyr : {gyr} mag : {mag}')
 
-            # Complementary filter
+            # remove constant offset from gyro data
+            # low pass filter gyro data
+
+            # temporally integrate rotation
             pitch += gyr[0]*dt_int
             roll -= gyr[1]*dt_int
 
             # Only use accelerometer when it's steady (magnitude is near 1g)
             force_magnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
             if force_magnitude > 0.9 and force_magnitude < 1.1:
-                pitch = pitch*0.95 + math.atan2(acc[1], math.sqrt(acc[0]**2 + acc[2]**2) )*180/math.pi *0.05
+                pitch = pitch*0.95 + math.atan2(acc[2], math.sqrt(acc[0]**2 + acc[1]**2) )*180/math.pi *0.05
                 roll = roll*0.9 + math.atan2(-acc[0], acc[2])*180/math.pi *0.05
             else:
                 logging.debug(f'exceeding acceleration magnitude: {force_magnitude}')
