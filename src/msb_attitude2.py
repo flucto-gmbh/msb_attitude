@@ -113,8 +113,8 @@ def main():
             # Only use accelerometer when it's steady (magnitude is near 1g)
             force_magnitude = math.sqrt(acc[0]**2 + acc[1]**2 + acc[2]**2)
             if force_magnitude > 0.9 and force_magnitude < 1.1:
-                pitch = pitch*0.95 + math.atan2(acc[2], math.sqrt(acc[0]**2 + acc[1]**2) )*180/math.pi *0.05
-                roll = roll*0.9 + math.atan2(-acc[0], acc[2])*180/math.pi *0.05
+                pitch = pitch*0.95 + math.atan2(-1*acc[0], acc[2])*180/math.pi *0.05
+                roll = roll*0.9 + math.atan2(acc[1], acc[2])*180/math.pi *0.05
             else:
                 logging.debug(f'exceeding acceleration magnitude: {force_magnitude}')
 
